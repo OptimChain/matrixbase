@@ -65,7 +65,7 @@ const Dash = (props) => {
       <div className="maincs w-100 " data-aos="fade-up" data-aos-delay="100">
         <div className="d-flex flex-column flex-shrink-0 p-3 w-100" style={{ width: "100%", background: "#0f1b2a" }}>
           <a href="/" className="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-light text-decoration-none">
-            <span className="fs-4 fw-bold">LOGO</span>
+            <span className="fs-4 fw-bold">S3 Vizer</span>
           </a>
           <hr />
           <ul className="nav nav-pills flex-column mb-auto">

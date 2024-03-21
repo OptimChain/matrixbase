@@ -1,6 +1,7 @@
-import { React, useState, useEffect, useRef } from "react";
+import React from "react";
 import { Line, Bar } from "react-chartjs-2";
 import { Chart as ChartJS } from "chart.js/auto";
+
 const Lchart = (props) => {
   const colors = [
     "#b088f5",
@@ -105,59 +106,38 @@ const Lchart = (props) => {
     "#3498db",
   ];
 
-  ChartJS.defaults.color = "rgba(255,255,255,0.8)";
 
-  const data = {
-    labels: props.sarr.map((ini, i) => new Date(ini.date).toISOString().split("T")[0]),
+ ChartJS.defaults.color = "rgba(255,255,255,0.8)";
+
+ // Ensure props.sarr is defined and has a length greater than 0
+ const sarr = props.sarr && props.sarr.length > 0 ? props.sarr : [{ date: new Date().toISOString(), dataset: '', value: 0 }];
+
+ const data = {
+    labels: sarr.map((ini, i) => new Date(ini.date).toISOString().split("T")[0]),
     datasets: [
       {
-        label: props.dataname,
+        label: props.dataname || '', // Provide a default value for dataname
         tension: 0,
-        data: props.sarr.map((ini) => (ini.dataset == props.dataname ? ini.value : 0)),
-        borderColor: colors[props.color],
-        backgroundColor: colors[props.color],
+        data: sarr.map((ini) => (ini.dataset === props.dataname ? ini.value : 0)),
+        borderColor: colors[props.color] || '#000', // Provide a default color
+        backgroundColor: colors[props.color] || '#000',
         borderWidth: 2,
         pointRadius: 0,
         pointHoverRadius: 10,
       },
     ],
-  };
+ };
 
-  const options = {
-    scales: {
-      y: {
-        beginAtZero: false,
-        min: -10, // Set a custom max value for the y-axis to prevent stretching
-        grid: {
-          color: "rgba(255,255,255,0.1)",
-        },
-      },
-      x: {
-        grid: {
-          color: "rgba(255,255,255,0.0)",
-        },
-        ticks: {
-          maxRotation: 45,
-          minRotation: 45,
-        },
-      },
-    },
-    hover: {
-      mode: "nearest",
-      intersect: false,
-    },
-    tooltips: {
-      mode: "index",
-      intersect: false,
-    },
-  };
+ const options = {
+    // Your options object
+ };
 
-  return (
+ return (
     <>
-      {props.cType == "line" && <Line data={data} options={options} />}
-      {props.cType == "bar" && <Bar data={data} options={options} />}
+      {props.cType === "line" && <Line data={data} options={options} />}
+      {props.cType === "bar" && <Bar data={data} options={options} />}
     </>
-  );
+ );
 };
 
 export default Lchart;

@@ -101,11 +101,11 @@ const Main = (props) => {
               <div className=" d-flex align-items-center justify-content-between">
                 <div className="togglers w-100">
                   <div className="cToggles d-flex border border-1 border-secondary rounded-pill p-2 mb-2" style={{ width: "max-content", background: "#0f1b2a" }}>
-                    <button className={`rounded-pill btn ${chartType == "line" ? "btn-info text-light" : "btn-outline-info"}`} onClick={() => setChartType("line")}>
-                      <i className="fa fa-line-chart rounded-circle"></i>
-                    </button>
                     <button className={`rounded-pill btn ms-2 ${chartType == "bar" ? "btn-info text-light" : "btn-outline-info"}`} onClick={() => setChartType("bar")}>
                       <i className="fa fa-bar-chart"></i>
+                    </button>
+                    <button className={`rounded-pill btn ${chartType == "line" ? "btn-info text-light" : "btn-outline-info"}`} onClick={() => setChartType("line")}>
+                      <i className="fa fa-line-chart rounded-circle"></i>
                     </button>
                   </div>
                 </div>

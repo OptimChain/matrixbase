@@ -1,59 +1,61 @@
+import { useState, useCallback } from "react";
 import "./App.css";
-import Main from "./components/main";
-import Header from "./components/header";
-import Dash from "./components/dash";
-import { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Login from "./components/login";
 
-import toast, { Toaster } from "react-hot-toast";
+const WORDS = [
+  "apple", "brave", "cloud", "dance", "eagle", "flame", "grace", "house",
+  "ivory", "joker", "knife", "lemon", "mango", "night", "ocean", "piano",
+  "queen", "river", "stone", "tiger", "unity", "valor", "whale", "xenon",
+  "youth", "zebra", "amber", "bloom", "chain", "drift", "ember", "frost",
+  "gleam", "haven", "inlet", "jewel", "knack", "lunar", "marsh", "noble",
+  "oasis", "pearl", "quest", "reign", "surge", "thorn", "urban", "vivid",
+  "wrath", "yield", "azure", "blaze", "coral", "delta", "epoch", "forge",
+  "ghost", "haste", "irony", "jolly", "karma", "lyric", "medal", "nexus",
+  "orbit", "prism", "quilt", "rusty", "solar", "truce", "ultra", "vigor",
+  "weave", "pixel", "abyss", "birch", "cider", "dwarf", "elbow", "fable",
+  "glyph", "hunch", "ivory", "jumbo", "kayak", "llama", "moose", "nerve",
+  "olive", "plume", "quirk", "rogue", "spice", "tulip", "umbra", "vault",
+  "waltz", "xerox", "yacht", "zonal", "alpha", "bravo", "chaos", "demon",
+  "exile", "flint", "grain", "hover", "index", "jelly", "kneel", "lodge",
+  "maple", "nomad", "optic", "paste", "query", "realm", "scout", "trace",
+  "unify", "venom", "wield", "xylem", "yeast", "zilch", "arrow", "bench",
+];
+
+function generateWords() {
+  const result = [];
+  for (let i = 0; i < 16; i++) {
+    const idx = Math.floor(Math.random() * WORDS.length);
+    result.push(WORDS[idx]);
+  }
+  return result.join(" ");
+}
 
 function App() {
-  const [screen, setScreen] = useState(0);
-  const [err, setErr] = useState(false);
-  const [currentRepo, setCurrentRepo] = useState();
-  const [search, setSearch] = useState("");
+  const [words, setWords] = useState(generateWords);
 
-  useEffect(() => {
-    if (window.location.pathname == "/" || window.location.pathname == "/git_auth") {
-      setScreen(false);
-      setErr(false);
-    } else {
-      setErr(true);
-    }
+  const handleGenerate = useCallback(() => {
+    setWords(generateWords());
   }, []);
 
-  return (
-    <>
-      <Toaster />
-      {console.log(search)}
-      <div className="row mx-0">
-        <Router>
-          {(window.location.pathname == "/" || window.location.pathname == "/pull-requests" || window.location.pathname == "/workflows" || window.location.pathname == "/add-repo") && (
-            <div className="col-2 p-0">
-              <Dash activerep={(e) => setCurrentRepo(e)} isactive={currentRepo} />
-            </div>
-          )}
-          <div className="col-10  p-0 mx-auto #0f1b2a " style={{ background: "#000716" }}>
-            {(window.location.pathname == "/" || window.location.pathname == "/pull-requests" || window.location.pathname == "/workflows" || window.location.pathname == "/add-repo") && (
-              <Header searchTerm={(e) => setSearch(e)} cSearch={search} />
-            )}
-            <Routes>
-              <Route path="/" element={<Main isactive={currentRepo} tsearch={search} />} />
-            </Routes>
-          </div>
-        </Router>
-      </div>
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(words);
+  }, [words]);
 
-      {err && (
-        <div className="loader d-flex align-items-center justify-content-center bg-light" data-aos="fade-up">
-          <div className="text-center">
-            <h1 className="display-1 text-danger fw-bold">404</h1>
-            <h1 className="display-2 text-dark fw-bold ">Not Found</h1>
-          </div>
+  return (
+    <div className="App">
+      <div className="container">
+        <h1>Random Word Generator</h1>
+        <p className="subtitle">Generate a random string of 16 words</p>
+        <div className="word-box">{words}</div>
+        <div className="buttons">
+          <button className="btn generate" onClick={handleGenerate}>
+            Generate
+          </button>
+          <button className="btn copy" onClick={handleCopy}>
+            Copy
+          </button>
         </div>
-      )}
-    </>
+      </div>
+    </div>
   );
 }
 

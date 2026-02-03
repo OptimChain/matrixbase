@@ -93,3 +93,84 @@ h1 {
 .btn.copy:hover {
   background: rgba(255, 255, 255, 0.15);
 }
+
+.submit-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.submit-section h2 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: #a78bfa;
+}
+
+.input-group {
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.input-group label {
+  display: block;
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin-bottom: 0.3rem;
+}
+
+.text-input {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.9rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #e2e8f0;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.text-input:focus {
+  border-color: #a78bfa;
+}
+
+.btn.submit {
+  background: linear-gradient(135deg, #4346e6, #6143e6);
+  color: #fff;
+}
+
+.btn.submit-auto {
+  background: linear-gradient(135deg, #e65073, #fc768a);
+  color: #fff;
+}
+
+.status-message {
+  margin-top: 1rem;
+  color: #60a5fa;
+  font-size: 0.9rem;
+}
+
+.help-section {
+  margin-top: 1.5rem;
+  text-align: left;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+.help-section summary {
+  cursor: pointer;
+  color: #a78bfa;
+  margin-bottom: 0.5rem;
+}
+
+.help-section ol {
+  padding-left: 1.2rem;
+  line-height: 1.8;
+}
+
+.help-section code {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}

@@ -170,10 +170,10 @@ function App() {
               <input
                 id="interval-input"
                 type="number"
-                min="5"
+                min="2"
                 max="300"
                 value={intervalSeconds}
-                onChange={(e) => setIntervalSeconds(Math.max(5, parseInt(e.target.value) || 30))}
+                onChange={(e) => setIntervalSeconds(Math.max(2, parseInt(e.target.value) || 30))}
                 className="interval-input"
               />
             </div>

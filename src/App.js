@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback } from "react";
 import "./App.css";
 
 const WORDS = [
@@ -20,9 +20,6 @@ const WORDS = [
   "unify", "venom", "wield", "xylem", "yeast", "zilch", "arrow", "bench",
 ];
 
-const DEFAULT_ACTION_URL =
-  "https://candy.ai/ai-girlfriend/olivia-carter/live-actions/olivia-carter/messages";
-
 function generateWords() {
   const result = [];
   for (let i = 0; i < 16; i++) {
@@ -32,12 +29,24 @@ function generateWords() {
   return result.join(" ");
 }
 
+// Bookmarklet code that runs on the target page
+const BOOKMARKLET_CODE = `(function(){
+  const WORDS=${JSON.stringify(WORDS)};
+  const gen=()=>{let r=[];for(let i=0;i<16;i++){r.push(WORDS[Math.floor(Math.random()*WORDS.length)])}return r.join(' ')};
+  const ta=document.querySelector('textarea[name="message_body"]');
+  if(!ta){alert('Textarea not found');return}
+  const words=gen();
+  ta.value=words;
+  ta.dispatchEvent(new Event('input',{bubbles:true}));
+  const btn=document.querySelector('button[data-action*="handleSend"]')||document.querySelector('button[type="submit"]');
+  if(btn){setTimeout(()=>btn.click(),100)}
+  console.log('Submitted:',words);
+})();`;
+
 function App() {
   const [words, setWords] = useState(generateWords);
-  const [authToken, setAuthToken] = useState("");
-  const [actionUrl, setActionUrl] = useState(DEFAULT_ACTION_URL);
   const [status, setStatus] = useState("");
-  const formRef = useRef(null);
+  const [autoSubmit, setAutoSubmit] = useState(true);
 
   const handleGenerate = useCallback(() => {
     setWords(generateWords());
@@ -50,31 +59,39 @@ function App() {
     setTimeout(() => setStatus(""), 2000);
   }, [words]);
 
-  const handleSubmit = useCallback(() => {
-    if (!authToken.trim()) {
-      setStatus("Please enter the authenticity token first.");
-      return;
-    }
-    if (formRef.current) {
-      formRef.current.submit();
-      setStatus("Submitted!");
-    }
-  }, [authToken]);
+  const handleCopyBookmarklet = useCallback(() => {
+    const code = autoSubmit
+      ? BOOKMARKLET_CODE
+      : BOOKMARKLET_CODE.replace(
+          "if(btn){setTimeout(()=>btn.click(),100)}",
+          "/* auto-submit disabled */"
+        );
+    const bookmarklet = `javascript:${encodeURIComponent(code)}`;
+    navigator.clipboard.writeText(bookmarklet);
+    setStatus("Bookmarklet copied! Create a new bookmark and paste as URL.");
+    setTimeout(() => setStatus(""), 4000);
+  }, [autoSubmit]);
 
-  const handleGenerateAndSubmit = useCallback(() => {
-    const newWords = generateWords();
-    setWords(newWords);
-    if (!authToken.trim()) {
-      setStatus("Please enter the authenticity token first.");
-      return;
-    }
-    setTimeout(() => {
-      if (formRef.current) {
-        formRef.current.submit();
-        setStatus("Generated & Submitted!");
-      }
-    }, 100);
-  }, [authToken]);
+  const handleCopyConsoleScript = useCallback(() => {
+    const code = autoSubmit
+      ? BOOKMARKLET_CODE
+      : BOOKMARKLET_CODE.replace(
+          "if(btn){setTimeout(()=>btn.click(),100)}",
+          "/* auto-submit disabled */"
+        );
+    navigator.clipboard.writeText(code);
+    setStatus("Console script copied! Paste in browser DevTools console.");
+    setTimeout(() => setStatus(""), 4000);
+  }, [autoSubmit]);
+
+  const bookmarkletHref = `javascript:${encodeURIComponent(
+    autoSubmit
+      ? BOOKMARKLET_CODE
+      : BOOKMARKLET_CODE.replace(
+          "if(btn){setTimeout(()=>btn.click(),100)}",
+          "/* auto-submit disabled */"
+        )
+  )}`;
 
   return (
     <div className="App">
@@ -92,79 +109,62 @@ function App() {
         </div>
 
         <div className="submit-section">
-          <h2>Submit to Chat</h2>
-          <div className="input-group">
-            <label htmlFor="action-url">Action URL</label>
-            <input
-              id="action-url"
-              type="text"
-              className="text-input"
-              value={actionUrl}
-              onChange={(e) => setActionUrl(e.target.value)}
-              placeholder="Form action URL"
-            />
-          </div>
-          <div className="input-group">
-            <label htmlFor="auth-token">Authenticity Token</label>
-            <input
-              id="auth-token"
-              type="text"
-              className="text-input"
-              value={authToken}
-              onChange={(e) => setAuthToken(e.target.value)}
-              placeholder="Paste authenticity_token from page source"
-            />
+          <h2>Submit to Chat (Bookmarklet)</h2>
+          <p className="section-desc">
+            Use this bookmarklet on the chat page. It generates 16 random words,
+            injects them into the textarea, and optionally auto-submits.
+          </p>
+
+          <div className="option-row">
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={autoSubmit}
+                onChange={(e) => setAutoSubmit(e.target.checked)}
+              />
+              Auto-submit after injection
+            </label>
           </div>
 
-          {/* Hidden form that performs the actual POST submission */}
-          <form
-            ref={formRef}
-            method="post"
-            action={actionUrl}
-            acceptCharset="UTF-8"
-            target="_blank"
-            style={{ display: "none" }}
-          >
-            <input
-              type="hidden"
-              name="authenticity_token"
-              value={authToken}
-            />
-            <textarea
-              name="message_body"
-              readOnly
-              value={words}
-              placeholder="Ask Anything"
-              rows={1}
-            />
-          </form>
+          <div className="bookmarklet-box">
+            <p className="drag-instruction">
+              Drag this link to your bookmarks bar:
+            </p>
+            <a
+              className="bookmarklet-link"
+              href={bookmarkletHref}
+              onClick={(e) => e.preventDefault()}
+            >
+              📝 Send 16 Words
+            </a>
+          </div>
 
           <div className="buttons">
-            <button className="btn submit" onClick={handleSubmit}>
-              Submit Words
+            <button className="btn submit" onClick={handleCopyBookmarklet}>
+              Copy Bookmarklet
             </button>
-            <button className="btn submit-auto" onClick={handleGenerateAndSubmit}>
-              Generate &amp; Submit
+            <button className="btn submit-auto" onClick={handleCopyConsoleScript}>
+              Copy Console Script
             </button>
           </div>
 
           {status && <p className="status-message">{status}</p>}
 
           <details className="help-section">
-            <summary>How to get the authenticity token</summary>
+            <summary>How to use</summary>
             <ol>
-              <li>Open the target chat page in your browser</li>
-              <li>Right-click the chat input area and choose "Inspect"</li>
               <li>
-                Find the <code>&lt;form&gt;</code> containing the{" "}
-                <code>&lt;textarea name="message_body"&gt;</code>
+                <strong>Bookmarklet:</strong> Drag the link above to your
+                bookmarks bar, or copy and create a bookmark manually
               </li>
-              <li>
-                Copy the <code>value</code> of the{" "}
-                <code>&lt;input type="hidden" name="authenticity_token"&gt;</code>
-              </li>
-              <li>Paste it into the "Authenticity Token" field above</li>
+              <li>Go to the chat page and log in</li>
+              <li>Click the bookmarklet to generate &amp; submit 16 words</li>
             </ol>
+            <p style={{ marginTop: "1rem" }}>
+              <strong>Alternative:</strong> Copy the console script, open
+              DevTools (F12) on the chat page, paste into Console, and press
+              Enter.
+            </p>
           </details>
         </div>
       </div>

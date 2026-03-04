@@ -1,0 +1,30 @@
+%%{init: {'theme': 'base'}}%%
+
+graph TD
+    FQ["Frontier Queue"] --> CH["Consistent Hashing<br/>(by hostname)"]
+
+    CH --> C1["Crawler 1<br/>━━━━━━━━━━━<br/>Domains: A, D, G<br/>Rate Limiter ✓<br/>robots.txt cache ✓"]
+    CH --> C2["Crawler 2<br/>━━━━━━━━━━━<br/>Domains: B, E, H<br/>Rate Limiter ✓<br/>robots.txt cache ✓"]
+    CH --> C3["Crawler 3<br/>━━━━━━━━━━━<br/>Domains: C, F, I<br/>Rate Limiter ✓<br/>robots.txt cache ✓"]
+
+    C1 --> WEB["External Web Servers"]
+    C2 --> WEB
+    C3 --> WEB
+
+    subgraph "Politeness Rules"
+        R1["1. Fetch robots.txt first"]
+        R2["2. Respect Crawl-delay"]
+        R3["3. Rate limit per domain"]
+        R4["4. Skip Disallow paths"]
+    end
+
+    style FQ fill:#4A90D9,color:#fff
+    style CH fill:#F5A623,color:#fff
+    style C1 fill:#2ECC71,color:#fff
+    style C2 fill:#3498DB,color:#fff
+    style C3 fill:#9B59B6,color:#fff
+    style WEB fill:#E74C3C,color:#fff
+    style R1 fill:#ECF0F1,color:#333
+    style R2 fill:#ECF0F1,color:#333
+    style R3 fill:#ECF0F1,color:#333
+    style R4 fill:#ECF0F1,color:#333

@@ -1,0 +1,36 @@
+%%{init: {'theme': 'base'}}%%
+
+graph LR
+    subgraph "Pipeline Stage 1: URL Fetcher"
+        A1["Receive URL<br/>from Queue"] --> A2["Check<br/>robots.txt"]
+        A2 --> A3["DNS<br/>Resolution"]
+        A3 --> A4["HTTP GET<br/>(fetch HTML)"]
+        A4 --> A5["Store Raw HTML<br/>in S3"]
+        A4 -->|"Failure"| A6["Retry<br/>(exponential backoff)"]
+        A6 --> A4
+    end
+
+    subgraph "Pipeline Stage 2: Text & URL Extraction"
+        B1["Read HTML<br/>from S3"] --> B2["Parse<br/>HTML"]
+        B2 --> B3["Extract<br/>Text Data"]
+        B2 --> B4["Extract<br/>URLs"]
+        B3 --> B5["Store Text<br/>in S3"]
+        B4 --> B6["URL<br/>Dedup"]
+        B6 --> B7["Add to<br/>Frontier Queue"]
+    end
+
+    A5 --> B1
+
+    style A1 fill:#4A90D9,color:#fff
+    style A2 fill:#F5A623,color:#fff
+    style A3 fill:#9B59B6,color:#fff
+    style A4 fill:#E74C3C,color:#fff
+    style A5 fill:#1ABC9C,color:#fff
+    style A6 fill:#E67E22,color:#fff
+    style B1 fill:#3498DB,color:#fff
+    style B2 fill:#2ECC71,color:#fff
+    style B3 fill:#1ABC9C,color:#fff
+    style B4 fill:#F39C12,color:#fff
+    style B5 fill:#16A085,color:#fff
+    style B6 fill:#8E44AD,color:#fff
+    style B7 fill:#4A90D9,color:#fff

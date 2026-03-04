@@ -1,0 +1,35 @@
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#4A90D9', 'primaryTextColor': '#fff', 'primaryBorderColor': '#2E5F8A', 'lineColor': '#333', 'secondaryColor': '#F5A623', 'tertiaryColor': '#7ED321'}}}%%
+
+graph TD
+    SEED["🌱 Seed URLs"] --> FQ["📋 Frontier Queue<br/>(Kafka / SQS)"]
+
+    FQ --> CRAWLER["🕷️ Crawler Service<br/>(Distributed Workers)"]
+
+    CRAWLER --> DNS["🌐 DNS Resolver<br/>(with Cache)"]
+
+    DNS --> FETCH["📥 Fetch HTML<br/>(HTTP GET)"]
+
+    FETCH --> S3RAW["💾 Blob Storage (S3)<br/>Raw HTML"]
+
+    FETCH --> EXTRACT["🔍 Text & URL<br/>Extraction"]
+
+    EXTRACT --> S3TEXT["💾 Blob Storage (S3)<br/>Extracted Text"]
+
+    EXTRACT --> DEDUP{"🔄 Deduplication<br/>Check"}
+
+    DEDUP -->|"New URL"| FQ
+    DEDUP -->|"Already seen"| SKIP["⏭️ Skip"]
+
+    DEDUP <--> METADB[("🗄️ Metadata DB<br/>(PostgreSQL)")]
+
+    style SEED fill:#7ED321,stroke:#4A8A1E,color:#fff
+    style FQ fill:#4A90D9,stroke:#2E5F8A,color:#fff
+    style CRAWLER fill:#F5A623,stroke:#C47D0E,color:#fff
+    style DNS fill:#9B59B6,stroke:#6C3483,color:#fff
+    style FETCH fill:#E74C3C,stroke:#A93226,color:#fff
+    style S3RAW fill:#1ABC9C,stroke:#0E8C73,color:#fff
+    style S3TEXT fill:#1ABC9C,stroke:#0E8C73,color:#fff
+    style EXTRACT fill:#3498DB,stroke:#2176AE,color:#fff
+    style DEDUP fill:#F39C12,stroke:#C47D0E,color:#fff
+    style METADB fill:#8E44AD,stroke:#6C3483,color:#fff
+    style SKIP fill:#95A5A6,stroke:#7F8C8D,color:#fff

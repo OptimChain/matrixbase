@@ -1,0 +1,87 @@
+%%{init: {'theme': 'base'}}%%
+
+graph TD
+    SEED["Seed URLs"] --> FQ
+
+    subgraph QUEUE ["Frontier Queue (Kafka/SQS)"]
+        FQ["Priority Queues"]
+        HI["High Priority"]
+        LO["Low Priority"]
+        FQ --- HI
+        FQ --- LO
+    end
+
+    FQ --> CH["Consistent Hashing<br/>(by domain)"]
+
+    subgraph CRAWLERS ["Distributed Crawlers"]
+        C1["Crawler 1<br/>+ Rate Limiter"]
+        C2["Crawler 2<br/>+ Rate Limiter"]
+        CN["Crawler N<br/>+ Rate Limiter"]
+    end
+
+    CH --> C1
+    CH --> C2
+    CH --> CN
+
+    subgraph STAGE1 ["Stage 1: Fetch"]
+        ROBOT["Check robots.txt"]
+        DNS["DNS Resolution<br/>(cached)"]
+        HTTP["HTTP GET"]
+    end
+
+    C1 --> ROBOT
+    C2 --> ROBOT
+    CN --> ROBOT
+    ROBOT --> DNS
+    DNS --> HTTP
+
+    HTTP --> S3RAW[("S3: Raw HTML")]
+
+    subgraph STAGE2 ["Stage 2: Extract"]
+        PARSE["Parse HTML"]
+        TEXT["Extract Text"]
+        URLS["Extract URLs"]
+    end
+
+    S3RAW --> PARSE
+    PARSE --> TEXT
+    PARSE --> URLS
+
+    TEXT --> S3TEXT[("S3: Text Data")]
+
+    subgraph DEDUP ["Deduplication Layer"]
+        URLDEDUP["URL Dedup"]
+        CONTENTDEDUP["Content Dedup<br/>(hash/bloom)"]
+        DEPTH["Depth Check<br/>(max ~20)"]
+    end
+
+    URLS --> URLDEDUP
+    URLDEDUP --> CONTENTDEDUP
+    CONTENTDEDUP --> DEPTH
+
+    DEPTH -->|"Pass"| FQ
+    DEPTH -->|"Fail"| DROP["Drop URL"]
+
+    URLDEDUP <--> METADB[("Metadata DB<br/>(PostgreSQL)")]
+    CONTENTDEDUP <--> REDIS[("Redis<br/>Bloom Filter")]
+
+    style SEED fill:#7ED321,color:#fff
+    style FQ fill:#4A90D9,color:#fff
+    style CH fill:#F5A623,color:#fff
+    style C1 fill:#2ECC71,color:#fff
+    style C2 fill:#3498DB,color:#fff
+    style CN fill:#9B59B6,color:#fff
+    style ROBOT fill:#F39C12,color:#fff
+    style DNS fill:#E74C3C,color:#fff
+    style HTTP fill:#D35400,color:#fff
+    style S3RAW fill:#1ABC9C,color:#fff
+    style PARSE fill:#3498DB,color:#fff
+    style TEXT fill:#2ECC71,color:#fff
+    style URLS fill:#F5A623,color:#fff
+    style S3TEXT fill:#16A085,color:#fff
+    style URLDEDUP fill:#8E44AD,color:#fff
+    style CONTENTDEDUP fill:#9B59B6,color:#fff
+    style DEPTH fill:#E74C3C,color:#fff
+    style DROP fill:#95A5A6,color:#fff
+    style METADB fill:#34495E,color:#fff
+    style REDIS fill:#C0392B,color:#fff

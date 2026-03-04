@@ -1,0 +1,43 @@
+%%{init: {'theme': 'base'}}%%
+
+graph TD
+    URL["New URL Discovered"] --> URLCHECK{"URL already<br/>in Metadata DB?"}
+
+    URLCHECK -->|"Yes"| SKIP1["Skip (URL Dedup)"]
+    URLCHECK -->|"No"| FETCH["Fetch Page"]
+
+    FETCH --> HASH["Hash Page Content<br/>(SHA-256)"]
+
+    HASH --> CONTENTCHECK{"Content hash<br/>already seen?"}
+
+    CONTENTCHECK -->|"Option A:<br/>Check Metadata DB"| DBA[("Metadata DB<br/>content_hash index")]
+    CONTENTCHECK -->|"Option B:<br/>Check Bloom Filter"| BF["Redis Bloom Filter<br/>BF.EXISTS"]
+
+    DBA -->|"Match"| SKIP2["Skip (Content Dedup)"]
+    DBA -->|"No match"| PROCESS["Process & Store"]
+
+    BF -->|"Probably exists"| SKIP3["Skip (Content Dedup)"]
+    BF -->|"Definitely not"| PROCESS2["Process & Store"]
+
+    subgraph "Near-Duplicate Detection (Simhash)"
+        SH1["Tokenize document"]
+        SH2["Weight features"]
+        SH3["Hash to binary vectors"]
+        SH4["Compute weighted sum"]
+        SH5["Generate 64-bit fingerprint"]
+        SH6["Compare Hamming distance"]
+        SH1 --> SH2 --> SH3 --> SH4 --> SH5 --> SH6
+    end
+
+    style URL fill:#4A90D9,color:#fff
+    style URLCHECK fill:#F5A623,color:#333
+    style SKIP1 fill:#95A5A6,color:#fff
+    style FETCH fill:#E74C3C,color:#fff
+    style HASH fill:#9B59B6,color:#fff
+    style CONTENTCHECK fill:#F39C12,color:#333
+    style DBA fill:#8E44AD,color:#fff
+    style BF fill:#E74C3C,color:#fff
+    style SKIP2 fill:#95A5A6,color:#fff
+    style SKIP3 fill:#95A5A6,color:#fff
+    style PROCESS fill:#2ECC71,color:#fff
+    style PROCESS2 fill:#2ECC71,color:#fff
